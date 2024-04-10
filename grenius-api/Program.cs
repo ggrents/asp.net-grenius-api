@@ -25,7 +25,9 @@
 //  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
+using grenius_api.Application.Extensions;
 using grenius_api.Application.Middleware;
+using grenius_api.Infrastructure.Database;
 using Microsoft.OpenApi.Models;
 using Serilog;
 
@@ -43,6 +45,7 @@ namespace grenius_api
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddDbContext<GreniusContext>();
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { 
@@ -67,17 +70,18 @@ namespace grenius_api
             builder.Host.UseSerilog();
             var app = builder.Build();
 
+            app.UseApiExceptionHandling();
+            app.UseSerilogRequestLogging();
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-            
-            app.UseMiddleware<ErrorHandlingMiddleware>();
+
             app.UseHttpsRedirection();
             app.UseAuthorization();
-            app.UseSerilogRequestLogging();
-            
+      
             app.MapControllers();
            
             app.Run();
