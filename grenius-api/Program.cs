@@ -25,9 +25,9 @@
 //  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
+using grenius_api.Application.Middleware;
 using Microsoft.OpenApi.Models;
 using Serilog;
-using Serilog.Events;
 
 namespace grenius_api
 {
@@ -73,6 +73,7 @@ namespace grenius_api
                 app.UseSwaggerUI();
             }
             
+            app.UseMiddleware<ErrorHandlingMiddleware>();
             app.UseHttpsRedirection();
             app.UseAuthorization();
             app.UseSerilogRequestLogging();
