@@ -29,7 +29,6 @@
 
   <ItemGroup>
     <Folder Include="Application\Models\" />
-    <Folder Include="Application\Repositories\" />
     <Folder Include="Application\Services\" />
   </ItemGroup>
 

@@ -26,7 +26,7 @@
 //
 
 using grenius_api.Application.Extensions;
-using grenius_api.Application.Middleware;
+using grenius_api.Application.Repositories;
 using grenius_api.Infrastructure.Database;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -46,6 +46,8 @@ namespace grenius_api
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddDbContext<GreniusContext>();
+
+            builder.Services.AddScoped<IArtistsRepository, ArtistsRepository>();
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { 
