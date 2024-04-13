@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace grenius_api.Domain.Configurations
+namespace grenius_api.Infrastructure.Configurations
 {
     public class FeatureConfiguration : IEntityTypeConfiguration<Feature>
     {
@@ -20,9 +20,9 @@ namespace grenius_api.Domain.Configurations
             builder.Property(p => p.ArtistId).HasColumnName("artist_id");
 
             builder.HasOne(p => p.Song)
-                    .WithMany(c=>c.Features)
+                    .WithMany(c => c.Features)
                     .HasForeignKey(p => p.SongId)
-                    .OnDelete(DeleteBehavior.Restrict); 
+                    .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(p => p.Artist)
                     .WithMany(c => c.Features)

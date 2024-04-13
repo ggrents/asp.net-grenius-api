@@ -26,10 +26,11 @@
 //
 
 using grenius_api.Application.Extensions;
-using grenius_api.Application.Repositories;
 using grenius_api.Infrastructure.Database;
+using grenius_api.Infrastructure.Mapping;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using System.Reflection;
 
 namespace grenius_api
 {
@@ -46,10 +47,12 @@ namespace grenius_api
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddDbContext<GreniusContext>();
+            builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
-            builder.Services.AddScoped<IArtistsRepository, ArtistsRepository>();
+            builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {
+                c.EnableAnnotations();
                 c.SwaggerDoc("v1", new OpenApiInfo { 
                     Title = "Grenius-API", 
                     Description = @"

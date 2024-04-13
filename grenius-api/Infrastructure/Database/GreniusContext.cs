@@ -1,7 +1,6 @@
-﻿using grenius_api.Domain.Configurations;
+﻿using grenius_api.Infrastructure.Configurations;
 using grenius_api.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 namespace grenius_api.Infrastructure.Database
 {

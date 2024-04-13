@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
 
-namespace grenius_api.Domain.Configurations
+namespace grenius_api.Infrastructure.Configurations
 {
     public class AlbumConfiguration : IEntityTypeConfiguration<Album>
     {
