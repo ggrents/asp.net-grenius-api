@@ -21,7 +21,7 @@ namespace grenius_api.Infrastructure.Configurations
             builder.Property(p => p.Id).HasColumnName("id");
             builder.Property(p => p.Title).HasColumnName("title");
             builder.Property(p => p.ReleaseDate).HasColumnName("releaseDate");
-            builder.Property(p => p.IsFeature).HasColumnName("nickname");
+            builder.Property(p => p.IsFeature).HasColumnName("isFeature");
             builder.Property(p => p.ArtistId).HasColumnName("artist_id");
             builder.Property(p => p.AlbumId).HasColumnName("album_id");
         }

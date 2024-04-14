@@ -10,6 +10,8 @@ namespace grenius_api.Infrastructure.Mapping
         public MappingProfile()
         {
             CreateMap<Artist, ArtistResponseDTO>();
+            CreateMap<Song, SongResponseDTO>();
+            CreateMap<Feature, FeatureResponseDTO>();
             CreateMap<Album, AlbumResponseDTO>().ForMember(dest => dest.AlbumType, opt =>
             {
                 opt.MapFrom(src => GetAlbumTypeDescription(src.AlbumTypeId));
@@ -25,9 +27,12 @@ namespace grenius_api.Infrastructure.Mapping
                 return "EP";
             case 2:
                 return "Single";
-            default:
+            case 3:
                 return "Mixtape";
-        }
+            
+            default:
+            throw new NotImplementedException();
+    }
 }
 
     }

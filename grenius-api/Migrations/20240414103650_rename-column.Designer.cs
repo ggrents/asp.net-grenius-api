@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using grenius_api.Infrastructure.Database;
 
@@ -11,9 +12,11 @@ using grenius_api.Infrastructure.Database;
 namespace grenius_api.Migrations
 {
     [DbContext(typeof(GreniusContext))]
-    partial class GreniusContextModelSnapshot : ModelSnapshot
+    [Migration("20240414103650_rename-column")]
+    partial class renamecolumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -53,39 +56,6 @@ namespace grenius_api.Migrations
                     b.HasIndex("ArtistId");
 
                     b.ToTable("albums", (string)null);
-                });
-
-            modelBuilder.Entity("grenius_api.Domain.Entities.Annotation", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("EndSymbol")
-                        .HasColumnType("int")
-                        .HasColumnName("end_symbol");
-
-                    b.Property<int>("LyricsId")
-                        .HasColumnType("int")
-                        .HasColumnName("lyrics_id");
-
-                    b.Property<int>("StartSymbol")
-                        .HasColumnType("int")
-                        .HasColumnName("start_symbol");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LyricsId");
-
-                    b.ToTable("annotation", (string)null);
                 });
 
             modelBuilder.Entity("grenius_api.Domain.Entities.Artist", b =>
@@ -156,30 +126,6 @@ namespace grenius_api.Migrations
                     b.ToTable("features", (string)null);
                 });
 
-            modelBuilder.Entity("grenius_api.Domain.Entities.Lyrics", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("SongId")
-                        .HasColumnType("int")
-                        .HasColumnName("song_id");
-
-                    b.Property<string>("Text")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SongId");
-
-                    b.ToTable("lyrics", (string)null);
-                });
-
             modelBuilder.Entity("grenius_api.Domain.Entities.Song", b =>
                 {
                     b.Property<int>("Id")
@@ -232,17 +178,6 @@ namespace grenius_api.Migrations
                     b.Navigation("Artist");
                 });
 
-            modelBuilder.Entity("grenius_api.Domain.Entities.Annotation", b =>
-                {
-                    b.HasOne("grenius_api.Domain.Entities.Lyrics", "Lyrics")
-                        .WithMany()
-                        .HasForeignKey("LyricsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Lyrics");
-                });
-
             modelBuilder.Entity("grenius_api.Domain.Entities.Feature", b =>
                 {
                     b.HasOne("grenius_api.Domain.Entities.Artist", "Artist")
@@ -258,17 +193,6 @@ namespace grenius_api.Migrations
                         .IsRequired();
 
                     b.Navigation("Artist");
-
-                    b.Navigation("Song");
-                });
-
-            modelBuilder.Entity("grenius_api.Domain.Entities.Lyrics", b =>
-                {
-                    b.HasOne("grenius_api.Domain.Entities.Song", "Song")
-                        .WithMany()
-                        .HasForeignKey("SongId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.Navigation("Song");
                 });

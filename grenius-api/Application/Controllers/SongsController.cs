@@ -1,140 +1,220 @@
-﻿//using AutoMapper;
-//using grenius_api.Application.Models.Requests;
-//using grenius_api.Application.Models.Responses;
-//using grenius_api.Domain.Entities;
-//using grenius_api.Infrastructure.Database;
-//using Microsoft.AspNetCore.Mvc;
-//using Microsoft.EntityFrameworkCore;
-//using Swashbuckle.AspNetCore.Annotations;
+﻿using AutoMapper;
+using grenius_api.Application.Models.Requests;
+using grenius_api.Application.Models.Responses;
+using grenius_api.Domain.Entities;
+using grenius_api.Infrastructure.Database;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 
-//namespace grenius_api.Application.Controllers
-//{
-//    [Route("api/artists")]
-//    [ApiController]
-//    public class ArtistsController: ControllerBase
-//    {
-//        private readonly ILogger<ArtistsController> _logger;
-//        private readonly GreniusContext _db;
-//        private readonly IMapper _mapper;
+namespace grenius_api.Application.Controllers
+{
+    [Route("api/songs")]
+    [ApiController]
+    public class SongsController : ControllerBase
+    {
+        private readonly ILogger<SongsController> _logger;
+        private readonly GreniusContext _db;
+        private readonly IMapper _mapper;
 
-//        public ArtistsController(GreniusContext db, ILogger<ArtistsController> logger, 
-//            IMapper mapper)
-//        {
-//            _db = db;
-//            _logger = logger;
-//            _mapper = mapper;
-//        }
+        public SongsController(GreniusContext db, ILogger<SongsController> logger,
+            IMapper mapper)
+        {
+            _db = db;
+            _logger = logger;
+            _mapper = mapper;
+        }
 
+        [HttpGet]
+        [SwaggerOperation(Summary = "Get a list of songs")]
+        [SwaggerResponse(200, Type = typeof(List<SongResponseDTO>))]
+        public async Task<IActionResult> GetSongs(CancellationToken cancellationToken, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 100)
+        {
+            return Ok(_mapper.Map<List<SongResponseDTO>>(await _db.Songs.Include(s=>s.Features)
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken)));
+        }
 
-//        [HttpGet]
-//        [SwaggerOperation(Summary ="Get a list of artists")]
-//        [SwaggerResponse(200, Type = typeof(List<ArtistResponseDTO>))]
-//        public async Task<IActionResult> GetArtists(CancellationToken cancellationToken)
-//        {
-//            return Ok(_mapper.Map<List<ArtistResponseDTO>>(await _db.Artists.ToListAsync(cancellationToken)));
-//        }
+        [HttpGet("album/{id}")]
+        [SwaggerOperation(Summary = "Get a list of songs by album")]
+        [SwaggerResponse(200, Type = typeof(List<SongResponseDTO>))]
+        public async Task<IActionResult> GetSongsByAlbum([SwaggerParameter("Album Id")]  int id , CancellationToken cancellationToken)
+        {
+            return Ok(_mapper.Map<List<SongResponseDTO>>(await _db.Songs.Include(s => s.Features).Where(s=>s.AlbumId==id).ToListAsync(cancellationToken)));
+        }
 
-//        [HttpGet("{id}")]
-//        [SwaggerOperation(Summary = "Get artist by id")]
-//        [SwaggerResponse(200, Type = typeof(ArtistResponseDTO))]
-//        [SwaggerResponse(404)]
-//        public async Task<IActionResult> GetArtistById([SwaggerParameter("Artist Id")] int id, CancellationToken cancellationToken)
-//        {
-//            if (id < 1)
-//            {
-//                _logger.LogWarning("The entered id is less than 1");
-//                return BadRequest("Id must be greater than 0");
-//            }
+        [HttpGet("artist/{id}")]
+        [SwaggerOperation(Summary = "Get a list of songs by artist")]
+        [SwaggerResponse(200, Type = typeof(List<SongResponseDTO>))]
+        public async Task<IActionResult> GetSongsByArtist([SwaggerParameter("Artist Id")] int id, CancellationToken cancellationToken)
+        {
+            var songList = await _db.Songs
+            .Include(s => s.Features)
+            .Where(s => s.ArtistId == id || s.Features.Any(f => f.ArtistId == id))
+            .ToListAsync(cancellationToken);
 
-//            Artist? _artist = await _db.Artists.FirstOrDefaultAsync(a=>a.Id == id, cancellationToken);
-//            if (_artist is null)
-//            {
-//                _logger.LogWarning("No artist with this id was found");
-//                return NotFound();
-//            }
-//            else
-//            {
-//                return Ok(_mapper.Map<ArtistResponseDTO>(_artist));
-//            }
-//        }
+            return Ok(_mapper.Map<List<SongResponseDTO>>(songList));
+        }
 
-//        [HttpPost]
-//        [SwaggerOperation(Summary = "Add artist")]
-//        [SwaggerResponse(200, Type = typeof(ArtistResponseDTO))]
-//        [SwaggerResponse(400)]
-//        public async Task<IActionResult> CreateArtist([SwaggerRequestBody("Artist details")] ArtistRequestDTO model, CancellationToken cancellationToken)
-//        {
-//            if (!ModelState.IsValid)
-//            {
-//                _logger.LogWarning("Invalid request body : @{model}", model);
-//                return BadRequest("Invalid request body");
-//            }
+        [HttpGet("{id}")]
+        [SwaggerOperation(Summary = "Get song by id")]
+        [SwaggerResponse(200, Type = typeof(SongResponseDTO))]
+        [SwaggerResponse(404)]
+        public async Task<IActionResult> GetSongById([SwaggerParameter("Song Id")] int id, CancellationToken cancellationToken)
+        {
+            if (id < 1)
+            {
+                _logger.LogWarning("The entered id is less than 1");
+                return BadRequest("Id must be greater than 0");
+            }
 
-//            var entity = _db.Artists.Add(new Artist
-//            {
-//                Name = model.Name,
-//                Surname = model.Surname,
-//                Nickname = model.Nickname,
-//                Country = model.Country,
-//                Birthday = model.Birthday
-//            }).Entity;
+            Song? _song = await _db.Songs.Include(s=>s.Features).FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
+            if (_song is null)
+            {
+                _logger.LogWarning("No artist with this id was found");
+                return NotFound();
+            }
+            else
+            {
+                return Ok(_mapper.Map<SongResponseDTO>(_song));
+            }
+        }
 
-//            await _db.SaveChangesAsync(cancellationToken);
-//            return CreatedAtAction(nameof(CreateArtist), new { Id = entity.Id }, _mapper.Map<ArtistResponseDTO>(entity));
-//        }
+        [HttpPost]
+        [SwaggerOperation(Summary = "Add song")]
+        [SwaggerResponse(200, Type = typeof(SongResponseDTO))]
+        [SwaggerResponse(400)]
+        public async Task<IActionResult> AddSong([SwaggerRequestBody("Song details")] SongRequestDTO model, CancellationToken cancellationToken)
+        {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Invalid request body: {@model}", model);
+                return BadRequest("Invalid request body");
+            }
 
-//        [HttpPut("{id}")]
-//        [SwaggerOperation(Summary = "Update Artist")]
-//        [SwaggerResponse(200, Type = typeof(ArtistResponseDTO))]
-//        [SwaggerResponse(400)]
-//        [SwaggerResponse(404)]
-//        public async Task<IActionResult> UpdateArtist([SwaggerParameter("Artist Id")] int id, [SwaggerRequestBody("Artist details")] ArtistRequestDTO model, CancellationToken cancellationToken)
-//        {
-//            if (!ModelState.IsValid)
-//            {
-//                _logger.LogWarning("Invalid request body : @{model}", model);
-//                return BadRequest("Invalid request body");
-//            }
-//            var entity = await _db.Artists.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
-//            if (entity is null)
-//            {
-//                _logger.LogWarning("No artist with this id was found");
-//                return NotFound();
-//            }
+            using (var transaction = await _db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                   
+                    var songEntity = _db.Songs.Add(new Song
+                    {
+                        Title = model.Title,
+                        ReleaseDate = model.ReleaseDate,
+                        IsFeature = model.IsFeature,
+                        ArtistId = model.ArtistId,
+                        AlbumId = model.AlbumId
+                    }).Entity;
 
-//            entity.Name = model.Name;
-//            entity.Surname = model.Surname;
-//            entity.Nickname = model.Surname;
-//            entity.Country = model.Country;
-//            entity.Birthday = model.Birthday;
+                    await _db.SaveChangesAsync(cancellationToken);
 
-//            await _db.SaveChangesAsync(cancellationToken);
-//            return Ok(_mapper.Map<ArtistResponseDTO>(entity));
-            
-//        }
-        
-//        [HttpDelete("{id}")]
-//        [SwaggerOperation(Summary = "Remove artist")]
-//        [SwaggerResponse(200, Type = typeof(ArtistResponseDTO))]
-//        [SwaggerResponse(404)]
-//        public async Task<IActionResult> DeleteArtist([SwaggerParameter("Artist Id")] int id, CancellationToken cancellationToken)
-//        {
-//            if (id < 1)
-//            {
-//                _logger.LogWarning("Id must be greater than 0"); 
-//                return BadRequest("Id must be greater than 0");
-//            }
-//            Artist? _artist = await _db.Artists.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
-//            if (_artist is null)
-//            {
-//                _logger.LogWarning("No artist with this id was found");
-//                return NotFound();                
-//            }
-            
-//            _db.Remove(_artist);
-//            await _db.SaveChangesAsync(cancellationToken);
-//            return NoContent();
-//        }
+                    if (model.IsFeature && model.Features != null && model.Features.Any())
+                    {
+                        var features = model.Features.Select(f => new Feature
+                        {
+                            Priority = f.Priority,
+                            ArtistId = f.ArtistId,
+                            SongId = songEntity.Id
+                        });
 
-//    }
-//}
+                        _db.Features.AddRange(features);
+                        await _db.SaveChangesAsync(cancellationToken);
+                    }
+
+                    await transaction.CommitAsync();
+
+                    return CreatedAtAction(nameof(AddSong), new {Id = songEntity.Id}, _mapper.Map<SongResponseDTO>(songEntity));
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    _logger.LogError(ex, "An error occurred while processing your request.");
+                    return StatusCode(500, "An error occurred while processing your request.");
+                }
+            }
+        }
+
+        [HttpPut("{id}")]
+        [SwaggerOperation(Summary = "Update song")]
+        [SwaggerResponse(200, Type = typeof(SongResponseDTO))]
+        [SwaggerResponse(400)]
+        [SwaggerResponse(404)]
+        public async Task<IActionResult> UpdateSong([SwaggerParameter("Song Id")] int id, [SwaggerRequestBody("Song details")] SongUpdateRequestDTO model, CancellationToken cancellationToken)
+        {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Invalid request body : @{model}", model);
+                return BadRequest("Invalid request body");
+            }
+            var entity = await _db.Songs.Include(s=>s.Features).FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
+            if (entity is null)
+            {
+                _logger.LogWarning("No song with this id was found");
+                return NotFound();
+            }
+
+            entity.Title = model.Title;
+            entity.ReleaseDate = model.ReleaseDate;
+            entity.IsFeature = model.IsFeature;
+            entity.AlbumId = model.AlbumId;
+            entity.ArtistId = model.ArtistId;
+            if (model.Features != null && model.Features.Any())
+            {
+                var requestFeatureIds = model.Features.Where(f => f.Id.HasValue).Select(f => f.Id.Value).ToList();
+
+                foreach (var featureRequest in model.Features)
+                {
+                    if (featureRequest.Id.HasValue)
+                    {
+                        var existingFeature = entity.Features.FirstOrDefault(f => f.Id == featureRequest.Id);
+                        if (existingFeature != null)
+                        {
+                            existingFeature.Priority = featureRequest.Priority;
+                            existingFeature.ArtistId = featureRequest.ArtistId;
+                        }
+                    }
+                    else
+                    {
+                        var newFeatures = model.Features.Where(f => !f.Id.HasValue).Select(f => new Feature
+                        {
+                            Priority = f.Priority,
+                            ArtistId = f.ArtistId,
+                            SongId = entity.Id
+                        }).ToList();
+                        _db.Features.AddRange(newFeatures);
+                    }
+                }
+
+                var featuresToRemove = entity.Features.Where(f => !requestFeatureIds.Contains(f.Id)).ToList();
+                _db.Features.RemoveRange(featuresToRemove);
+            }
+            await _db.SaveChangesAsync(cancellationToken);
+            return Ok(_mapper.Map<SongResponseDTO>(entity));
+        }
+
+        [HttpDelete("{id}")]
+        [SwaggerOperation(Summary = "Remove song")]
+        [SwaggerResponse(200, Type = typeof(SongResponseDTO))]
+        [SwaggerResponse(404)]
+        public async Task<IActionResult> DeleteSong([SwaggerParameter("Song Id")] int id, CancellationToken cancellationToken)
+        {
+            if (id < 1)
+            {
+                _logger.LogWarning("Id must be greater than 0");
+                return BadRequest("Id must be greater than 0");
+            }
+            Song? _song= await _db.Songs.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
+            if (_song is null)
+            {
+                _logger.LogWarning("No song with this id was found");
+                return NotFound();
+            }
+
+            _db.Remove(_song);
+            await _db.SaveChangesAsync(cancellationToken);
+            return NoContent();
+        }
+
+    }
+}

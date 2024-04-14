@@ -58,6 +58,21 @@ namespace grenius_api.Application.Controllers
             }
         }
 
+        [HttpGet("artist/{id}")]
+        [SwaggerOperation(Summary = "Get albums by artist id")]
+        [SwaggerResponse(200, Type = typeof(List<AlbumResponseDTO>))]
+        [SwaggerResponse(404)]
+        public async Task<IActionResult> GetAlbumsByArtist([SwaggerParameter("Artist Id")] int id, CancellationToken cancellationToken)
+        {
+            if (id < 1)
+            {
+                _logger.LogWarning("The entered id is less than 1");
+                return BadRequest("Id must be greater than 0");
+            }
+
+            return Ok(_mapper.Map<List<AlbumResponseDTO>>(await _db.Albums.Where(a => a.ArtistId == id).ToListAsync(cancellationToken)));
+        }
+
         [HttpPost]
         [SwaggerOperation(Summary = "Add album")]
         [SwaggerResponse(200, Type = typeof(AlbumResponseDTO))]

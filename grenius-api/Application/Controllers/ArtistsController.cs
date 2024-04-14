@@ -29,9 +29,12 @@ namespace grenius_api.Application.Controllers
         [HttpGet]
         [SwaggerOperation(Summary ="Get a list of artists")]
         [SwaggerResponse(200, Type = typeof(List<ArtistResponseDTO>))]
-        public async Task<IActionResult> GetArtists(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetArtists(CancellationToken cancellationToken, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 100)
         {
-            return Ok(_mapper.Map<List<ArtistResponseDTO>>(await _db.Artists.ToListAsync(cancellationToken)));
+            return Ok(_mapper.Map<List<ArtistResponseDTO>>(await _db.Artists
+                .Skip((pageIndex-1)*pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken)));
         }
 
         [HttpGet("{id}")]
