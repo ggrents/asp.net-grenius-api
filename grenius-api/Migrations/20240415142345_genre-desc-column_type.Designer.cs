@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using grenius_api.Infrastructure.Database;
 
@@ -11,9 +12,11 @@ using grenius_api.Infrastructure.Database;
 namespace grenius_api.Migrations
 {
     [DbContext(typeof(GreniusContext))]
-    partial class GreniusContextModelSnapshot : ModelSnapshot
+    [Migration("20240415142345_genre-desc-column_type")]
+    partial class genredesccolumn_type
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

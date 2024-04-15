@@ -9,6 +9,8 @@ namespace grenius_api.Infrastructure.Database
         private readonly string? _connectionString;
         public DbSet<Artist> Artists { get; set; }
         public DbSet<Song> Songs { get; set; }
+        public DbSet<Genre> Genres { get; set; }
+        public DbSet<Producer> Producers { get; set; }
         public DbSet<Lyrics> Lyrics{ get; set; }
         public DbSet<Annotation> Annotation { get; set; }
         public DbSet<Album> Albums { get; set; }
@@ -30,6 +32,8 @@ namespace grenius_api.Infrastructure.Database
             modelBuilder.ApplyConfiguration(new SongConfiguration());
             modelBuilder.ApplyConfiguration(new LyricsConfiguration());
             modelBuilder.ApplyConfiguration(new AnnotationConfiguration());
+            modelBuilder.ApplyConfiguration(new GenreConfiguration());
+            modelBuilder.ApplyConfiguration(new ProducerConfiguration());
         }
 
     }

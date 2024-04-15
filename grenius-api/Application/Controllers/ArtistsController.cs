@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
+using grenius_api.Application.Extensions;
 using grenius_api.Application.Models.Requests;
 using grenius_api.Application.Models.Responses;
 using grenius_api.Domain.Entities;
 using grenius_api.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace grenius_api.Application.Controllers
@@ -16,22 +18,26 @@ namespace grenius_api.Application.Controllers
         private readonly ILogger<ArtistsController> _logger;
         private readonly GreniusContext _db;
         private readonly IMapper _mapper;
-
-        public ArtistsController(GreniusContext db, ILogger<ArtistsController> logger, 
-            IMapper mapper)
+        private readonly IDistributedCache _cache;
+    
+        public ArtistsController(GreniusContext db, 
+            ILogger<ArtistsController> logger, 
+            IMapper mapper,
+            IDistributedCache cache)
         {
             _db = db;
             _logger = logger;
             _mapper = mapper;
+            _cache = cache;
         }
-
 
         [HttpGet]
         [SwaggerOperation(Summary ="Get a list of artists")]
         [SwaggerResponse(200, Type = typeof(List<ArtistResponseDTO>))]
         public async Task<IActionResult> GetArtists(CancellationToken cancellationToken, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 100)
         {
-            return Ok(_mapper.Map<List<ArtistResponseDTO>>(await _db.Artists
+            return Ok(_mapper.Map<List<ArtistResponseDTO>>(
+                 await _db.Artists
                 .Skip((pageIndex-1)*pageSize)
                 .Take(pageSize)
                 .ToListAsync(cancellationToken)));
@@ -49,15 +55,27 @@ namespace grenius_api.Application.Controllers
                 return BadRequest("Id must be greater than 0");
             }
 
-            Artist? _artist = await _db.Artists.FirstOrDefaultAsync(a=>a.Id == id, cancellationToken);
-            if (_artist is null)
+            string cacheKey = $"artist_{id}";
+            var cachedArtist = await _cache.GetRecordAsync<ArtistResponseDTO>(cancellationToken, cacheKey);
+            if (cachedArtist != null)
             {
-                _logger.LogWarning("No artist with this id was found");
-                return NotFound();
+                return Ok(cachedArtist);
             }
             else
             {
-                return Ok(_mapper.Map<ArtistResponseDTO>(_artist));
+                Artist? _artist = await _db.Artists.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
+                if (_artist is null)
+                {
+                    _logger.LogWarning("No artist with this id was found");
+                    return NotFound();
+                }
+                else
+                {
+                    var responseArtist = _mapper.Map<ArtistResponseDTO>(_artist);
+                    await _cache.SetRecordAsync(cancellationToken, cacheKey, responseArtist);
+                    return Ok(responseArtist);
+                }
+
             }
         }
 
@@ -65,7 +83,7 @@ namespace grenius_api.Application.Controllers
         [SwaggerOperation(Summary = "Add artist")]
         [SwaggerResponse(200, Type = typeof(ArtistResponseDTO))]
         [SwaggerResponse(400)]
-        public async Task<IActionResult> CreateArtist([SwaggerRequestBody("Artist details")] ArtistRequestDTO model, CancellationToken cancellationToken)
+        public async Task<IActionResult> AddArtist([SwaggerRequestBody("Artist details")] ArtistRequestDTO model, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
@@ -83,7 +101,7 @@ namespace grenius_api.Application.Controllers
             }).Entity;
 
             await _db.SaveChangesAsync(cancellationToken);
-            return CreatedAtAction(nameof(CreateArtist), new { Id = entity.Id }, _mapper.Map<ArtistResponseDTO>(entity));
+            return CreatedAtAction(nameof(AddArtist), new { Id = entity.Id }, _mapper.Map<ArtistResponseDTO>(entity));
         }
 
         [HttpPut("{id}")]

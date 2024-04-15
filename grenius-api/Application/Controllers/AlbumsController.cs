@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
+using grenius_api.Application.Extensions;
 using grenius_api.Application.Models.Requests;
 using grenius_api.Application.Models.Responses;
 using grenius_api.Domain.Entities;
 using grenius_api.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace grenius_api.Application.Controllers
@@ -16,13 +18,15 @@ namespace grenius_api.Application.Controllers
         private readonly ILogger<AlbumsController> _logger;
         private readonly GreniusContext _db;
         private readonly IMapper _mapper;
+        private readonly IDistributedCache _cache;
 
         public AlbumsController(GreniusContext db, ILogger<AlbumsController> logger, 
-            IMapper mapper)
+            IMapper mapper, IDistributedCache cache)
         {
             _db = db;
             _logger = logger;
             _mapper = mapper;
+            _cache = cache;
         }
 
 
@@ -46,15 +50,27 @@ namespace grenius_api.Application.Controllers
                 return BadRequest("Id must be greater than 0");
             }
 
-            Album? _album = await _db.Albums.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
-            if (_album is null)
+            string cacheKey = $"album_{id}";
+            var cachedAlbum = await _cache.GetRecordAsync<AlbumResponseDTO>(cancellationToken, cacheKey);
+            if (cachedAlbum != null)
             {
-                _logger.LogWarning("No album with this id was found");
-                return NotFound();
+                return Ok(cachedAlbum);
             }
             else
             {
-                return Ok(_mapper.Map<AlbumResponseDTO>(_album));
+
+                Album? _album = await _db.Albums.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
+                if (_album is null)
+                {
+                    _logger.LogWarning("No album with this id was found");
+                    return NotFound();
+                }
+                else
+                {
+                    var responseAlbum = _mapper.Map<AlbumResponseDTO>(_album);
+                    await _cache.SetRecordAsync(cancellationToken, cacheKey, responseAlbum);
+                    return Ok(responseAlbum);
+                }
             }
         }
 

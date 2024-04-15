@@ -12,6 +12,8 @@ namespace grenius_api.Infrastructure.Mapping
             CreateMap<Artist, ArtistResponseDTO>();
             CreateMap<Song, SongResponseDTO>();
             CreateMap<Feature, FeatureResponseDTO>();
+            CreateMap<Genre, GenreResponseDTO>();
+            CreateMap<Producer, ProducerResponseDTO>();
             CreateMap<Album, AlbumResponseDTO>().ForMember(dest => dest.AlbumType, opt =>
             {
                 opt.MapFrom(src => GetAlbumTypeDescription(src.AlbumTypeId));

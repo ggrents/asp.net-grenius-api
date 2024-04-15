@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
+using grenius_api.Application.Extensions;
 using grenius_api.Application.Models.Requests;
 using grenius_api.Application.Models.Responses;
 using grenius_api.Domain.Entities;
 using grenius_api.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace grenius_api.Application.Controllers
@@ -16,13 +18,15 @@ namespace grenius_api.Application.Controllers
         private readonly ILogger<SongsController> _logger;
         private readonly GreniusContext _db;
         private readonly IMapper _mapper;
+        private readonly IDistributedCache _cache;
 
         public SongsController(GreniusContext db, ILogger<SongsController> logger,
-            IMapper mapper)
+            IMapper mapper, IDistributedCache cache)
         {
             _db = db;
             _logger = logger;
             _mapper = mapper;
+            _cache = cache;
         }
 
         [HttpGet]
@@ -42,6 +46,22 @@ namespace grenius_api.Application.Controllers
         public async Task<IActionResult> GetSongsByAlbum([SwaggerParameter("Album Id")]  int id , CancellationToken cancellationToken)
         {
             return Ok(_mapper.Map<List<SongResponseDTO>>(await _db.Songs.Include(s => s.Features).Where(s=>s.AlbumId==id).ToListAsync(cancellationToken)));
+        }
+
+        [HttpGet("genre/{id}")]
+        [SwaggerOperation(Summary = "Get a list of songs by genre")]
+        [SwaggerResponse(200, Type = typeof(List<SongResponseDTO>))]
+        public async Task<IActionResult> GetSongsByGenre([SwaggerParameter("Genre Id")] int id, CancellationToken cancellationToken)
+        {
+            return Ok(_mapper.Map<List<SongResponseDTO>>(await _db.Songs.Include(s => s.Features).Where(s => s.GenreId == id).ToListAsync(cancellationToken)));
+        }
+
+        [HttpGet("producer/{id}")]
+        [SwaggerOperation(Summary = "Get a list of songs by producer")]
+        [SwaggerResponse(200, Type = typeof(List<SongResponseDTO>))]
+        public async Task<IActionResult> GetSongsByProducer([SwaggerParameter("Producer Id")] int id, CancellationToken cancellationToken)
+        {
+            return Ok(_mapper.Map<List<SongResponseDTO>>(await _db.Songs.Include(s => s.Features).Where(s => s.ProducerId == id).ToListAsync(cancellationToken)));
         }
 
         [HttpGet("artist/{id}")]
@@ -69,15 +89,26 @@ namespace grenius_api.Application.Controllers
                 return BadRequest("Id must be greater than 0");
             }
 
-            Song? _song = await _db.Songs.Include(s=>s.Features).FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
-            if (_song is null)
+            string cacheKey = $"song_{id}";
+            var cachedSong = await _cache.GetRecordAsync<SongResponseDTO>(cancellationToken, cacheKey);
+            if (cachedSong != null)
             {
-                _logger.LogWarning("No artist with this id was found");
-                return NotFound();
+                return Ok(cachedSong);
             }
             else
             {
-                return Ok(_mapper.Map<SongResponseDTO>(_song));
+                Song? _song = await _db.Songs.Include(s => s.Features).FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
+                if (_song is null)
+                {
+                    _logger.LogWarning("No artist with this id was found");
+                    return NotFound();
+                }
+                else
+                {
+                    var responseSong = _mapper.Map<SongResponseDTO>(_song);
+                    await _cache.SetRecordAsync(cancellationToken, cacheKey, responseSong);
+                    return Ok(responseSong);
+                }
             }
         }
 
@@ -104,7 +135,9 @@ namespace grenius_api.Application.Controllers
                         ReleaseDate = model.ReleaseDate,
                         IsFeature = model.IsFeature,
                         ArtistId = model.ArtistId,
-                        AlbumId = model.AlbumId
+                        AlbumId = model.AlbumId,
+                        ProducerId = model.ProducerId,
+                        GenreId = model.GenreId
                     }).Entity;
 
                     await _db.SaveChangesAsync(cancellationToken);
@@ -158,7 +191,10 @@ namespace grenius_api.Application.Controllers
             entity.ReleaseDate = model.ReleaseDate;
             entity.IsFeature = model.IsFeature;
             entity.AlbumId = model.AlbumId;
+            entity.GenreId = model.GenreId;
             entity.ArtistId = model.ArtistId;
+            entity.ProducerId = model.ProducerId;
+
             if (model.Features != null && model.Features.Any())
             {
                 var requestFeatureIds = model.Features.Where(f => f.Id.HasValue).Select(f => f.Id.Value).ToList();
@@ -204,13 +240,14 @@ namespace grenius_api.Application.Controllers
                 _logger.LogWarning("Id must be greater than 0");
                 return BadRequest("Id must be greater than 0");
             }
-            Song? _song= await _db.Songs.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
+            Song? _song= await _db.Songs.Include(s=>s.Features).FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
             if (_song is null)
             {
                 _logger.LogWarning("No song with this id was found");
                 return NotFound();
             }
 
+            _db.RemoveRange(_song.Features);
             _db.Remove(_song);
             await _db.SaveChangesAsync(cancellationToken);
             return NoContent();

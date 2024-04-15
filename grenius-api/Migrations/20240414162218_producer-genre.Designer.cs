@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using grenius_api.Infrastructure.Database;
 
@@ -11,9 +12,11 @@ using grenius_api.Infrastructure.Database;
 namespace grenius_api.Migrations
 {
     [DbContext(typeof(GreniusContext))]
-    partial class GreniusContextModelSnapshot : ModelSnapshot
+    [Migration("20240414162218_producer-genre")]
+    partial class producergenre
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -166,7 +169,7 @@ namespace grenius_api.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
-                        .HasColumnType("TEXT")
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("description");
 
                     b.Property<string>("Name")

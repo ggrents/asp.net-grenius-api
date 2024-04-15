@@ -27,7 +27,6 @@
 
 using grenius_api.Application.Extensions;
 using grenius_api.Infrastructure.Database;
-using grenius_api.Infrastructure.Mapping;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Reflection;
@@ -48,6 +47,11 @@ namespace grenius_api
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddDbContext<GreniusContext>();
             builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+            builder.Services.AddStackExchangeRedisCache((options) =>
+            {
+                options.Configuration = builder.Configuration.GetConnectionString("Redis");
+                options.InstanceName = "redis-dev";
+            });
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
@@ -71,11 +75,13 @@ namespace grenius_api
                     }
                     });
             });
-
             builder.Host.UseSerilog();
+
+            
             var app = builder.Build();
 
             app.UseApiExceptionHandling();
+            
             app.UseSerilogRequestLogging();
 
             if (app.Environment.IsDevelopment())
@@ -88,7 +94,6 @@ namespace grenius_api
             app.UseAuthorization();
       
             app.MapControllers();
-           
             app.Run();
         }
     }
