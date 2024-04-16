@@ -1,12 +1,10 @@
-﻿namespace grenius_api.Domain.Entities
+﻿namespace grenius_api.Application.Models.Requests
 {
-    public class Annotation
+    public class AnnotationUpdateRequestDTO
     {
-        public int Id { get; set; }
         public int StartSymbol { get; set; }
         public int EndSymbol { get; set; }
         public string Text { get; set; } = string.Empty;
         public int LyricsId { get; set; }
-        public Lyrics Lyrics { get; set; }
     }
 }

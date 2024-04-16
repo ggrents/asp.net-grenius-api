@@ -93,7 +93,7 @@ namespace grenius_api.Application.Controllers
         [SwaggerOperation(Summary = "Add album")]
         [SwaggerResponse(200, Type = typeof(AlbumResponseDTO))]
         [SwaggerResponse(400)]
-        public async Task<IActionResult> CreateAlbum([SwaggerRequestBody("Album details")] AlbumRequestDTO model, CancellationToken cancellationToken)
+        public async Task<IActionResult> AddAlbum([SwaggerRequestBody("Album details")] AlbumRequestDTO model, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
@@ -110,7 +110,7 @@ namespace grenius_api.Application.Controllers
             }).Entity;
 
             await _db.SaveChangesAsync(cancellationToken);
-            return CreatedAtAction(nameof(CreateAlbum), new { Id = entity.Id }, _mapper.Map<AlbumResponseDTO>(entity));
+            return CreatedAtAction(nameof(AddAlbum), new { Id = entity.Id }, _mapper.Map<AlbumResponseDTO>(entity));
         }
 
         [HttpPut("{id}")]
@@ -144,7 +144,7 @@ namespace grenius_api.Application.Controllers
 
         [HttpDelete("{id}")]
         [SwaggerOperation(Summary = "Remove album")]
-        [SwaggerResponse(200, Type = typeof(AlbumResponseDTO))]
+        [SwaggerResponse(200)]
         [SwaggerResponse(404)]
         public async Task<IActionResult> DeleteAlbum([SwaggerParameter("Album Id")] int id, CancellationToken cancellationToken)
         {

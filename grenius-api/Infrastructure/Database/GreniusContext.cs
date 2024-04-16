@@ -12,7 +12,7 @@ namespace grenius_api.Infrastructure.Database
         public DbSet<Genre> Genres { get; set; }
         public DbSet<Producer> Producers { get; set; }
         public DbSet<Lyrics> Lyrics{ get; set; }
-        public DbSet<Annotation> Annotation { get; set; }
+        public DbSet<Annotation> Annotations { get; set; }
         public DbSet<Album> Albums { get; set; }
         public DbSet<Feature> Features{ get; set; }
         public GreniusContext(IConfiguration configuration)

@@ -96,7 +96,7 @@ namespace grenius_api.Application.Controllers
             var entity = await _db.Genres.FirstOrDefaultAsync(g => g.Id == id, cancellationToken);
             if (entity is null)
             {
-                _logger.LogWarning("No artist with this id was found");
+                _logger.LogWarning("No genre with this id was found");
                 return NotFound();
             }
 
@@ -111,7 +111,7 @@ namespace grenius_api.Application.Controllers
 
         [HttpDelete("{id}")]
         [SwaggerOperation(Summary = "Remove genre")]
-        [SwaggerResponse(200, Type = typeof(GenreResponseDTO))]
+        [SwaggerResponse(200)]
         [SwaggerResponse(404)]
         public async Task<IActionResult> DeleteGenre([SwaggerParameter("Genre Id")] int id, CancellationToken cancellationToken)
         {
@@ -123,7 +123,7 @@ namespace grenius_api.Application.Controllers
             Genre? _genre = await _db.Genres.FirstOrDefaultAsync(g => g.Id == id, cancellationToken);
             if (_genre is null)
             {
-                _logger.LogWarning("No artist with this id was found");
+                _logger.LogWarning("No genre with this id was found");
                 return NotFound();
             }
 

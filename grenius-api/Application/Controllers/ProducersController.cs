@@ -115,7 +115,7 @@ namespace grenius_api.Application.Controllers
 
         [HttpDelete("{id}")]
         [SwaggerOperation(Summary = "Remove producer")]
-        [SwaggerResponse(200, Type = typeof(ProducerResponseDTO))]
+        [SwaggerResponse(200)]
         [SwaggerResponse(404)]
         public async Task<IActionResult> DeleteProducer([SwaggerParameter("Producer Id")] int id, CancellationToken cancellationToken)
         {

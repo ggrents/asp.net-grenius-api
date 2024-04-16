@@ -1,27 +1,26 @@
 ﻿using AutoMapper;
-using grenius_api.Application.Models.Requests;
 using grenius_api.Application.Models.Responses;
+using grenius_api.Application.Services;
 using grenius_api.Domain.Entities;
 
-namespace grenius_api.Infrastructure.Mapping
+public class MappingProfile : Profile
 {
-    public class MappingProfile : Profile
+    public MappingProfile()
     {
-        public MappingProfile()
-        {
-            CreateMap<Artist, ArtistResponseDTO>();
-            CreateMap<Song, SongResponseDTO>();
-            CreateMap<Feature, FeatureResponseDTO>();
-            CreateMap<Genre, GenreResponseDTO>();
-            CreateMap<Producer, ProducerResponseDTO>();
-            CreateMap<Album, AlbumResponseDTO>().ForMember(dest => dest.AlbumType, opt =>
-            {
-                opt.MapFrom(src => GetAlbumTypeDescription(src.AlbumTypeId));
-            });
-        }
-        private string GetAlbumTypeDescription(AlbumType albumType)
-{
-        switch ((int) albumType)
+        CreateMap<Artist, ArtistResponseDTO>();
+        CreateMap<Song, SongResponseDTO>();
+        CreateMap<Feature, FeatureResponseDTO>();
+        CreateMap<Genre, GenreResponseDTO>();
+        CreateMap<Producer, ProducerResponseDTO>();
+        CreateMap<Lyrics, LyricsResponseDTO>();
+        CreateMap<Annotation, AnnotationResponseDTO>()
+            .ConvertUsing<AnnotationToAnnotationResponseDTOConverter>();
+        CreateMap<Album, AlbumResponseDTO>().ForMember(dest => dest.AlbumType, opt => opt.MapFrom(src => GetAlbumTypeDescription(src.AlbumTypeId)));
+    }
+
+    private string GetAlbumTypeDescription(AlbumType albumType)
+    {
+        switch ((int)albumType)
         {
             case 0:
                 return "Album";
@@ -31,11 +30,23 @@ namespace grenius_api.Infrastructure.Mapping
                 return "Single";
             case 3:
                 return "Mixtape";
-            
             default:
-            throw new NotImplementedException();
+                throw new NotImplementedException();
+        }
     }
 }
 
+public class AnnotationToAnnotationResponseDTOConverter : ITypeConverter<Annotation, AnnotationResponseDTO>
+{
+    private readonly IAnnotationService _annotationService;
+
+    public AnnotationToAnnotationResponseDTOConverter(IAnnotationService annotationService)
+    {
+        _annotationService = annotationService;
+    }
+
+    public AnnotationResponseDTO Convert(Annotation source, AnnotationResponseDTO destination, ResolutionContext context)
+    {
+        return _annotationService.ConvertEntityToResponse(source);
     }
 }

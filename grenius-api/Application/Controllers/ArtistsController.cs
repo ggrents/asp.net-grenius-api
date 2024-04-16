@@ -136,7 +136,7 @@ namespace grenius_api.Application.Controllers
         
         [HttpDelete("{id}")]
         [SwaggerOperation(Summary = "Remove artist")]
-        [SwaggerResponse(200, Type = typeof(ArtistResponseDTO))]
+        [SwaggerResponse(200)]
         [SwaggerResponse(404)]
         public async Task<IActionResult> DeleteArtist([SwaggerParameter("Artist Id")] int id, CancellationToken cancellationToken)
         {

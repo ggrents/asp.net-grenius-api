@@ -26,7 +26,9 @@
 //
 
 using grenius_api.Application.Extensions;
+using grenius_api.Application.Services;
 using grenius_api.Infrastructure.Database;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Reflection;
@@ -52,6 +54,8 @@ namespace grenius_api
                 options.Configuration = builder.Configuration.GetConnectionString("Redis");
                 options.InstanceName = "redis-dev";
             });
+
+            builder.Services.AddScoped<IAnnotationService, AnnotationService>();
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
