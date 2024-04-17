@@ -28,10 +28,13 @@
 using grenius_api.Application.Extensions;
 using grenius_api.Application.Services;
 using grenius_api.Infrastructure.Database;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Reflection;
+using System.Text;
 
 namespace grenius_api
 {
@@ -48,7 +51,12 @@ namespace grenius_api
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddDbContext<GreniusContext>();
+            builder.Services.Configure<SecurityOptions>(
+            builder.Configuration.GetSection(SecurityOptions.Security));
+            
+            
             builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
             builder.Services.AddStackExchangeRedisCache((options) =>
             {
                 options.Configuration = builder.Configuration.GetConnectionString("Redis");
@@ -56,6 +64,26 @@ namespace grenius_api
             });
 
             builder.Services.AddScoped<IAnnotationService, AnnotationService>();
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    var securitySection = builder.Configuration.GetSection("Security");
+                    options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+                    ValidIssuer = securitySection["Issuer"],
+                    
+                    ValidateAudience = false,
+                    ValidAudience = securitySection["Audience"],
+                    ValidateLifetime = false,
+
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(securitySection["Secret"]!)),
+                };
+            });
+
+            builder.Services.AddAuthorization();
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
@@ -74,11 +102,35 @@ namespace grenius_api
                     Contact = new OpenApiContact
                     {
                         Name = "Grents Artem",
-                        Email="gggrents@gmail.com",
                         Url = new Uri("https://github.com/ggrents")
                     }
                     });
+
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+              new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                },
+                new string[] {}
+        }
+    });
             });
+
+
             builder.Host.UseSerilog();
 
             
@@ -95,6 +147,7 @@ namespace grenius_api
             }
 
             app.UseHttpsRedirection();
+            app.UseAuthentication();
             app.UseAuthorization();
       
             app.MapControllers();

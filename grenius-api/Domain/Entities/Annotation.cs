@@ -7,6 +7,8 @@
         public int EndSymbol { get; set; }
         public string Text { get; set; } = string.Empty;
         public int LyricsId { get; set; }
+        public int UserCreatedId { get; set; }
         public Lyrics Lyrics { get; set; }
+        public User? UserCreated { get; set; }
     }
 }

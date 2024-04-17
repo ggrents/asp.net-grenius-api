@@ -3,12 +3,14 @@ using grenius_api.Application.Models.Requests;
 using grenius_api.Application.Models.Responses;
 using grenius_api.Domain.Entities;
 using grenius_api.Infrastructure.Database;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace grenius_api.Application.Controllers
 {
+    [Authorize]
     [Route("api/genres")]
     [ApiController]
     public class GenresController : ControllerBase
@@ -30,7 +32,9 @@ namespace grenius_api.Application.Controllers
         [SwaggerResponse(200, Type = typeof(List<GenreResponseDTO>))]
         public async Task<IActionResult> GetGenres(CancellationToken cancellationToken)
         {
-            return Ok(_mapper.Map<List<GenreResponseDTO>>(await _db.Genres.ToListAsync(cancellationToken)));
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "userId").Value;
+            //return Ok(_mapper.Map<List<GenreResponseDTO>>(await _db.Genres.ToListAsync(cancellationToken)));
+            return Ok(userIdClaim);
         }
 
 

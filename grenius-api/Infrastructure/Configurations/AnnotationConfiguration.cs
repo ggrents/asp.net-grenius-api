@@ -14,6 +14,7 @@ namespace grenius_api.Infrastructure.Configurations
             builder.Property(p => p.Text).IsRequired();
             builder.Property(p => p.StartSymbol).IsRequired();
             builder.Property(p => p.EndSymbol).IsRequired();
+            builder.Property(p => p.UserCreatedId).IsRequired();
 
             builder.Property(p => p.Text).HasColumnType("TEXT");
 
@@ -22,6 +23,7 @@ namespace grenius_api.Infrastructure.Configurations
             builder.Property(p => p.StartSymbol).HasColumnName("start_symbol");
             builder.Property(p => p.EndSymbol).HasColumnName("end_symbol");
             builder.Property(p => p.LyricsId).HasColumnName("lyrics_id");
+            builder.Property(p => p.UserCreatedId).HasColumnName("user_created_id");
         }
     }
 }
