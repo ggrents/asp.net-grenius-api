@@ -29,7 +29,6 @@ using grenius_api.Application.Extensions;
 using grenius_api.Application.Services;
 using grenius_api.Infrastructure.Database;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -44,39 +43,39 @@ namespace grenius_api
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            Log.Logger = new LoggerConfiguration()
-                        .ReadFrom.Configuration(builder.Configuration)
-                        .CreateLogger();
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddDbContext<GreniusContext>();
-            builder.Services.Configure<SecurityOptions>(
-            builder.Configuration.GetSection(SecurityOptions.Security));
-            
-            
-            builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
+            Log.Logger = new LoggerConfiguration()
+                        .ReadFrom.Configuration(builder.Configuration)
+                        .CreateLogger();
+            builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+            builder.Services.AddDbContext<GreniusContext>();
             builder.Services.AddStackExchangeRedisCache((options) =>
             {
                 options.Configuration = builder.Configuration.GetConnectionString("Redis");
                 options.InstanceName = "redis-dev";
             });
 
+
+            builder.Services.Configure<SecurityOptions>(
+            builder.Configuration.GetSection(SecurityOptions.Security));
             builder.Services.AddScoped<IAnnotationService, AnnotationService>();
             builder.Services.AddScoped<IUserService, UserService>();
+            
+            
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
                     var securitySection = builder.Configuration.GetSection("Security");
                     options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer = false,
+                    ValidateIssuer = true,
                     ValidIssuer = securitySection["Issuer"],
                     
-                    ValidateAudience = false,
+                    ValidateAudience = true,
                     ValidAudience = securitySection["Audience"],
-                    ValidateLifetime = false,
 
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(securitySection["Secret"]!)),
@@ -85,7 +84,6 @@ namespace grenius_api
 
             builder.Services.AddAuthorization();
 
-            builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {
                 c.EnableAnnotations();
@@ -106,28 +104,25 @@ namespace grenius_api
                     }
                     });
 
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+                var securityScheme = new OpenApiSecurityScheme()
                 {
                     Name = "Authorization",
-                    Type = SecuritySchemeType.ApiKey,
+                    Type = SecuritySchemeType.Http,
                     Scheme = "Bearer",
                     BearerFormat = "JWT",
                     In = ParameterLocation.Header,
-                });
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-              new OpenApiSecurityScheme
-                {
                     Reference = new OpenApiReference
                     {
                         Type = ReferenceType.SecurityScheme,
                         Id = "Bearer"
                     }
-                },
-                new string[] {}
-        }
-    });
+                };
+
+                c.AddSecurityDefinition("Bearer", securityScheme);
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {securityScheme, new [] { "Bearer"} } 
+                });
             });
 
 

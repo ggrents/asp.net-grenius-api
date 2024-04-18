@@ -13,6 +13,8 @@ public class MappingProfile : Profile
         CreateMap<Genre, GenreResponseDTO>();
         CreateMap<Producer, ProducerResponseDTO>();
         CreateMap<Lyrics, LyricsResponseDTO>();
+        CreateMap<User, UserResponseDTO>();
+        CreateMap<Role, RoleResponseDTO>();
         CreateMap<Annotation, AnnotationResponseDTO>()
             .ConvertUsing<AnnotationToAnnotationResponseDTOConverter>();
         CreateMap<Album, AlbumResponseDTO>().ForMember(dest => dest.AlbumType, opt => opt.MapFrom(src => GetAlbumTypeDescription(src.AlbumTypeId)));

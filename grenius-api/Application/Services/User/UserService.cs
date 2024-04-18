@@ -1,6 +1,7 @@
 ﻿using grenius_api.Domain.Entities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -64,15 +65,16 @@ namespace grenius_api.Application.Services
 
         public string CreateToken(User user)
         {
+            var claims = new List<Claim> { new Claim(ClaimTypes.Name, user.Id.ToString()) };
+            foreach (var userRole in user.UserRoles!)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, userRole.Role!.Name));
+            }
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new Claim[]
-           {
-                new Claim("userId", user.Id.ToString()),
-                //new Claim(ClaimTypes.Name, user.Username),
-                //new Claim("roleId", user.)
-           }),
+            {   
+                
+                Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.UtcNow.AddHours(_expirationHours),
                 Issuer = _options.Issuer,
                 Audience = _options.Audience,

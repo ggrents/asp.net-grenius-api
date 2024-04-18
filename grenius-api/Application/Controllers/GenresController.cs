@@ -10,7 +10,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace grenius_api.Application.Controllers
 {
-    [Authorize]
+    [Authorize(Roles ="admin")]
     [Route("api/genres")]
     [ApiController]
     public class GenresController : ControllerBase
@@ -32,9 +32,7 @@ namespace grenius_api.Application.Controllers
         [SwaggerResponse(200, Type = typeof(List<GenreResponseDTO>))]
         public async Task<IActionResult> GetGenres(CancellationToken cancellationToken)
         {
-            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "userId").Value;
-            //return Ok(_mapper.Map<List<GenreResponseDTO>>(await _db.Genres.ToListAsync(cancellationToken)));
-            return Ok(userIdClaim);
+           return Ok(_mapper.Map<List<GenreResponseDTO>>(await _db.Genres.ToListAsync(cancellationToken)));
         }
 
 
