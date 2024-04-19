@@ -13,7 +13,6 @@ namespace grenius_api.Infrastructure.Database
         public DbSet<Producer> Producers { get; set; }
         public DbSet<User> Users{ get; set; }
         public DbSet<Role> Roles{ get; set; }
-        public DbSet<UserRole> UserRoles{ get; set; }
         public DbSet<Lyrics> Lyrics{ get; set; }
         public DbSet<Annotation> Annotations { get; set; }
         public DbSet<Album> Albums { get; set; }
@@ -36,7 +35,6 @@ namespace grenius_api.Infrastructure.Database
             modelBuilder.ApplyConfiguration(new LyricsConfiguration());
             modelBuilder.ApplyConfiguration(new UserConfiguration());
             modelBuilder.ApplyConfiguration(new RoleConfiguration());
-            modelBuilder.ApplyConfiguration(new UserRoleConfiguration());
             modelBuilder.ApplyConfiguration(new AnnotationConfiguration());
             modelBuilder.ApplyConfiguration(new GenreConfiguration());
             modelBuilder.ApplyConfiguration(new ProducerConfiguration());

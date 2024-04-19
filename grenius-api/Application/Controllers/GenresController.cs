@@ -10,7 +10,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace grenius_api.Application.Controllers
 {
-    [Authorize(Roles ="admin")]
+    [Authorize]
     [Route("api/genres")]
     [ApiController]
     public class GenresController : ControllerBase
@@ -83,6 +83,7 @@ namespace grenius_api.Application.Controllers
             return CreatedAtAction(nameof(AddGenre), new { Id = entity.Id }, _mapper.Map<GenreResponseDTO>(entity));
         }
 
+        [Authorize(Roles = "editor,admin")]
         [HttpPut("{id}")]
         [SwaggerOperation(Summary = "Update Genre")]
         [SwaggerResponse(200, Type = typeof(GenreResponseDTO))]
@@ -110,7 +111,7 @@ namespace grenius_api.Application.Controllers
 
         }
 
-
+        [Authorize(Roles = "editor,admin")]
         [HttpDelete("{id}")]
         [SwaggerOperation(Summary = "Remove genre")]
         [SwaggerResponse(200)]

@@ -4,6 +4,7 @@ using grenius_api.Application.Models.Requests;
 using grenius_api.Application.Models.Responses;
 using grenius_api.Domain.Entities;
 using grenius_api.Infrastructure.Database;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
@@ -11,6 +12,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace grenius_api.Application.Controllers
 {
+    [Authorize]
     [Route("api/albums")]
     [ApiController]
     public class AlbumsController: ControllerBase
@@ -89,6 +91,7 @@ namespace grenius_api.Application.Controllers
             return Ok(_mapper.Map<List<AlbumResponseDTO>>(await _db.Albums.Where(a => a.ArtistId == id).ToListAsync(cancellationToken)));
         }
 
+        
         [HttpPost]
         [SwaggerOperation(Summary = "Add album")]
         [SwaggerResponse(200, Type = typeof(AlbumResponseDTO))]
@@ -113,6 +116,7 @@ namespace grenius_api.Application.Controllers
             return CreatedAtAction(nameof(AddAlbum), new { Id = entity.Id }, _mapper.Map<AlbumResponseDTO>(entity));
         }
 
+        [Authorize(Roles = "editor,admin")]
         [HttpPut("{id}")]
         [SwaggerOperation(Summary = "Update Album")]
         [SwaggerResponse(200, Type = typeof(AlbumResponseDTO))]
@@ -142,6 +146,7 @@ namespace grenius_api.Application.Controllers
 
         }
 
+        [Authorize(Roles = "editor,admin")]
         [HttpDelete("{id}")]
         [SwaggerOperation(Summary = "Remove album")]
         [SwaggerResponse(200)]

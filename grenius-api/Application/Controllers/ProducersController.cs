@@ -3,12 +3,14 @@ using grenius_api.Application.Models.Requests;
 using grenius_api.Application.Models.Responses;
 using grenius_api.Domain.Entities;
 using grenius_api.Infrastructure.Database;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace grenius_api.Application.Controllers
 {
+    [Authorize]
     [Route("api/producers")]
     [ApiController]
     public class ProducersController: ControllerBase
@@ -84,6 +86,7 @@ namespace grenius_api.Application.Controllers
             return CreatedAtAction(nameof(AddProducer), new { Id = entity.Id }, _mapper.Map<ProducerResponseDTO>(entity));
         }
 
+        [Authorize(Roles = "editor,admin")]
         [HttpPut("{id}")]
         [SwaggerOperation(Summary = "Update producer")]
         [SwaggerResponse(200, Type = typeof(ProducerResponseDTO))]
@@ -111,8 +114,8 @@ namespace grenius_api.Application.Controllers
             await _db.SaveChangesAsync(cancellationToken);
             return Ok(_mapper.Map<ProducerResponseDTO>(entity));           
         }
-        
 
+        [Authorize(Roles = "editor,admin")]
         [HttpDelete("{id}")]
         [SwaggerOperation(Summary = "Remove producer")]
         [SwaggerResponse(200)]

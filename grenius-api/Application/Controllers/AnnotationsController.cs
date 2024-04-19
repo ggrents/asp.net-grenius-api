@@ -4,12 +4,14 @@ using grenius_api.Application.Models.Responses;
 using grenius_api.Application.Services;
 using grenius_api.Domain.Entities;
 using grenius_api.Infrastructure.Database;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace grenius_api.Application.Controllers
 {
+    [Authorize]
     [Route("api/annotations")]
     [ApiController]
     public class AnnotationsController : ControllerBase
@@ -92,7 +94,7 @@ namespace grenius_api.Application.Controllers
             return Ok(annotationResponseDTOs);
         }
 
-
+        
         [HttpPost]
         [SwaggerOperation(Summary = "Add Annotation")]
         [SwaggerResponse(200, Type = typeof(AnnotationResponseDTO))]
@@ -120,6 +122,7 @@ namespace grenius_api.Application.Controllers
             return CreatedAtAction(nameof(AddAnnotation), new { Id = entity.Id }, responseDto);
         }
 
+        [Authorize(Roles = "editor,admin")]
         [HttpPut("{id}")]
         [SwaggerOperation(Summary = "Update annotation")]
         [SwaggerResponse(200, Type = typeof(AnnotationResponseDTO))]
@@ -149,7 +152,7 @@ namespace grenius_api.Application.Controllers
 
         }
 
-
+        [Authorize(Roles = "editor,admin")]
         [HttpDelete("{id}")]
         [SwaggerOperation(Summary = "Remove annotation")]
         [SwaggerResponse(200)]

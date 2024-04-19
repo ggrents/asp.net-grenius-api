@@ -65,11 +65,10 @@ namespace grenius_api.Application.Services
 
         public string CreateToken(User user)
         {
-            var claims = new List<Claim> { new Claim(ClaimTypes.Name, user.Id.ToString()) };
-            foreach (var userRole in user.UserRoles!)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, userRole.Role!.Name));
-            }
+            string roleName = user.Role!=null ? user.Role.Name : "";
+            var claims = new List<Claim> { new Claim(ClaimTypes.Name, user.Id.ToString()),
+            new Claim(ClaimTypes.Role, roleName)};
+            
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenDescriptor = new SecurityTokenDescriptor
             {   

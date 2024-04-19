@@ -4,6 +4,7 @@ using grenius_api.Application.Models.Responses;
 using grenius_api.Application.Services;
 using grenius_api.Domain.Entities;
 using grenius_api.Infrastructure.Database;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -11,6 +12,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace grenius_api.Application.Controllers
 {
+    [Authorize(Roles = "admin")]
     [Route("api/users")]
     [ApiController]
     public class UsersController : ControllerBase
@@ -33,6 +35,7 @@ namespace grenius_api.Application.Controllers
             return await _db.Users.AnyAsync(x => x.Username == username, cancellationToken);
         }
 
+        [AllowAnonymous]
         [HttpGet]
         [SwaggerOperation(Summary = "Get a list of users")]
         [SwaggerResponse(200, Type = typeof(List<UserResponseDTO>))]
@@ -65,6 +68,34 @@ namespace grenius_api.Application.Controllers
             }
         }
 
+
+        [HttpGet("role/{id}")]
+        [SwaggerOperation(Summary = "Get a list of users by role")]
+        [SwaggerResponse(200, Type = typeof(List<UserResponseDTO>))]
+        public async Task<IActionResult> GetUsersByRole([SwaggerParameter("Role Id")] int id, CancellationToken cancellationToken)
+        {
+            return Ok(_mapper.Map<List<UserResponseDTO>>(await _db.Users.Where(u=>u.RoleId==id).ToListAsync(cancellationToken)));
+        }
+
+        [HttpPatch("{id}/change-role")]
+        [SwaggerOperation(Summary = "Change the role of a user")]
+        [SwaggerResponse(200, Type = typeof(UserResponseDTO))]
+        [SwaggerResponse(400)]
+        [SwaggerResponse(404)]
+        public async Task<IActionResult> ChangeRole([SwaggerParameter("User Id")] int id, [SwaggerRequestBody("Role Id")] int roleId, CancellationToken cancellationToken)
+        {
+            var entity = await _db.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+            if (entity is null)
+            {
+                _logger.LogWarning("No user with this id was found");
+                return NotFound();
+            }
+
+            entity.RoleId = roleId;
+            await _db.SaveChangesAsync(cancellationToken);
+            return Ok(_mapper.Map<UserResponseDTO>(entity));
+        }
+
         [HttpPut("{id}")]
         [SwaggerOperation(Summary = "Update user")]
         [SwaggerResponse(200, Type = typeof(UserResponseDTO))]
@@ -80,13 +111,14 @@ namespace grenius_api.Application.Controllers
             var entity = await _db.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
             if (entity is null)
             {
-                _logger.LogWarning("No genre with this id was found");
+                _logger.LogWarning("No user with this id was found");
                 return NotFound();
             }
 
             entity.Username = model.Username;
             entity.Email = model.Email;
             entity.IsActive = model.IsActive;
+            entity.RoleId = model.RoleId;
 
             await _db.SaveChangesAsync(cancellationToken);
             return Ok(_mapper.Map<UserResponseDTO>(entity));
@@ -116,6 +148,7 @@ namespace grenius_api.Application.Controllers
             return NoContent();
         }
 
+        [AllowAnonymous]
         [HttpPost("register")]
         [SwaggerOperation(Summary = "Registration of a user")]
         [SwaggerResponse(201)]
@@ -142,7 +175,8 @@ namespace grenius_api.Application.Controllers
                 Username = _user.Username,
                 DateCreated = DateTime.UtcNow,
                 IsActive = true,
-                PasswordHash = _userService.HashPassword(_user.Password)
+                PasswordHash = _userService.HashPassword(_user.Password),
+                RoleId = 4
             };
 
             await _db.Users.AddAsync(user);
@@ -150,7 +184,7 @@ namespace grenius_api.Application.Controllers
             return Created();
         }
 
-
+        [AllowAnonymous]
         [HttpPost("login")]
         [SwaggerOperation(Summary = "Authentication of a user")]
         [SwaggerResponse(200)]
@@ -165,8 +199,7 @@ namespace grenius_api.Application.Controllers
             }
 
             var user = await _db.Users
-                .Include(u => u.UserRoles!)
-                .ThenInclude(ur=>ur.Role)
+                .Include(u=>u.Role)
                 .SingleOrDefaultAsync(x => x.Username == _user.Username);
 
             if (user == null)

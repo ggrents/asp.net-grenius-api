@@ -3,12 +3,14 @@ using grenius_api.Application.Models.Requests;
 using grenius_api.Application.Models.Responses;
 using grenius_api.Domain.Entities;
 using grenius_api.Infrastructure.Database;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace grenius_api.Application.Controllers
 {
+    [Authorize]
     [Route("api/roles")]
     [ApiController]
     public class RolesController : ControllerBase
@@ -58,6 +60,7 @@ namespace grenius_api.Application.Controllers
             }
         }
 
+        [Authorize(Roles ="admin")]
         [HttpPost]
         [SwaggerOperation(Summary = "Add role")]
         [SwaggerResponse(200, Type = typeof(RoleResponseDTO))]
@@ -79,6 +82,7 @@ namespace grenius_api.Application.Controllers
             return CreatedAtAction(nameof(AddRole), new { Id = entity.Id }, _mapper.Map<RoleResponseDTO>(entity));
         }
 
+        [Authorize(Roles = "admin")]
         [HttpPut("{id}")]
         [SwaggerOperation(Summary = "Update role")]
         [SwaggerResponse(200, Type = typeof(RoleResponseDTO))]
@@ -104,7 +108,7 @@ namespace grenius_api.Application.Controllers
             return Ok(_mapper.Map<RoleResponseDTO>(entity));
         }
 
-
+        [Authorize(Roles = "admin")]
         [HttpDelete("{id}")]
         [SwaggerOperation(Summary = "Remove role")]
         [SwaggerResponse(200)]

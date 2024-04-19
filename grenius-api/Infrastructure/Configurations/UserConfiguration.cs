@@ -13,12 +13,19 @@ namespace grenius_api.Infrastructure.Configurations
             builder.Property(p => p.Username).IsRequired();
             builder.Property(p => p.Email).IsRequired();
             builder.Property(p => p.PasswordHash).IsRequired();
+            builder.Property(p => p.RoleId).IsRequired(false);
 
             builder.Property(p => p.Id).HasColumnName("id");
             builder.Property(p => p.Username).HasColumnName("username");
             builder.Property(p => p.Email).HasColumnName("email");
             builder.Property(p => p.PasswordHash).HasColumnName("passwordHash");
             builder.Property(p => p.IsActive).HasColumnName("isActive");
+            builder.Property(p => p.RoleId).HasColumnName("role_id");
+
+            builder.HasOne(p => p.Role)
+                  .WithMany(c => c.Users)
+                  .HasForeignKey(p => p.RoleId)
+                  .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

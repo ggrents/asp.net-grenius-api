@@ -8,7 +8,8 @@
         public required string Email { get; set; }
         public DateTime DateCreated { get; set; }
         public bool IsActive { get; set; }
-        public List<UserRole>? UserRoles { get; set; }
+        public int? RoleId { get; set; }
+        public Role? Role { get; set; }
         public List<Lyrics>? Lyrics { get; set; }
         public List<Annotation>? Annotations { get; set; }
 

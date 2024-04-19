@@ -4,6 +4,7 @@ using grenius_api.Application.Models.Requests;
 using grenius_api.Application.Models.Responses;
 using grenius_api.Domain.Entities;
 using grenius_api.Infrastructure.Database;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
@@ -11,6 +12,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace grenius_api.Application.Controllers
 {
+    [Authorize]
     [Route("api/lyrics")]
     [ApiController]
     public class LyricsController : ControllerBase
@@ -102,6 +104,7 @@ namespace grenius_api.Application.Controllers
             return CreatedAtAction(nameof(AddLyrics), new { Id = entity.Id }, _mapper.Map<LyricsResponseDTO>(entity));
         }
 
+        [Authorize(Roles = "editor,admin")]
         [HttpPut("{id}")]
         [SwaggerOperation(Summary = "Update lyrics")]
         [SwaggerResponse(200, Type = typeof(LyricsResponseDTO))]
@@ -129,7 +132,7 @@ namespace grenius_api.Application.Controllers
 
         }
 
-
+        [Authorize(Roles = "editor,admin")]
         [HttpDelete("{id}")]
         [SwaggerOperation(Summary = "Remove lyrics")]
         [SwaggerResponse(200)]

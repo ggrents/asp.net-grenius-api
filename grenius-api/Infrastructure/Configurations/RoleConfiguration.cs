@@ -14,6 +14,8 @@ namespace grenius_api.Infrastructure.Configurations
 
             builder.Property(p => p.Id).HasColumnName("id");
             builder.Property(p => p.Name).HasColumnName("name");
+            
+        
         }
     }
 
