@@ -1,0 +1,6 @@
+@grenius_rating_HostAddress = http://localhost:5070
+
+GET {{grenius_rating_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

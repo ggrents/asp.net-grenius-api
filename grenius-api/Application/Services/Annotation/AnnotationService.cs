@@ -69,7 +69,7 @@ namespace grenius_api.Application.Services
             {
                 StartSymbol = startIndex,
                 EndSymbol = endIndex,
-                Text = requestDto.Fragment,
+                Text = requestDto.Explanation,
                 LyricsId = lyrics.Id,
                 Lyrics = lyrics
             };

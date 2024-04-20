@@ -114,7 +114,9 @@ namespace grenius_api.Application.Controllers
                 return BadRequest("Lyrics not found");
             }
 
+            int.TryParse(User.Identity!.Name, out int userId);
             var annotation = _service.ConvertRequestToEntity(model, _lyrics);
+            annotation.UserCreatedId = userId; 
             var entity = _db.Annotations.Add(annotation).Entity;
             await _db.SaveChangesAsync(cancellationToken);
 
@@ -142,10 +144,13 @@ namespace grenius_api.Application.Controllers
                 return NotFound();
             }
 
+
+
             entity.StartSymbol = model.StartSymbol;
             entity.EndSymbol = model.EndSymbol;
             entity.Text = model.Text;
             entity.LyricsId = model.LyricsId;
+
 
             await _db.SaveChangesAsync(cancellationToken);
             return Ok(_mapper.Map<AnnotationResponseDTO>(entity));

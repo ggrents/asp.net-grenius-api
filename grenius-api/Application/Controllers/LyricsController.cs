@@ -94,11 +94,14 @@ namespace grenius_api.Application.Controllers
                 return BadRequest("Invalid request body");
             }
 
-            var entity = _db.Lyrics.Add(new Lyrics
+            int.TryParse(User.Identity!.Name, out int parsedUserId);
+            
+                var entity = _db.Lyrics.Add(new Lyrics
             {
                 SongId = model.SongId,
-                Text = model.Text
-            }).Entity;
+                Text = model.Text,
+                UserCreatedId = parsedUserId
+                }).Entity;
 
             await _db.SaveChangesAsync(cancellationToken);
             return CreatedAtAction(nameof(AddLyrics), new { Id = entity.Id }, _mapper.Map<LyricsResponseDTO>(entity));
@@ -122,6 +125,12 @@ namespace grenius_api.Application.Controllers
             {
                 _logger.LogWarning("No lyrics with this id was found");
                 return NotFound();
+            }
+
+            int.TryParse(User.Identity!.Name, out int userId);
+            if (entity.UserCreatedId != userId)
+            {
+                return Forbid("YoYou cannot edit text that you have not created");
             }
 
             entity.SongId = model.SongId;
