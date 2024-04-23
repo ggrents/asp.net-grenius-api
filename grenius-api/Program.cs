@@ -28,6 +28,7 @@
 using grenius_api.Application.Extensions;
 using grenius_api.Application.Services;
 using grenius_api.Infrastructure.Database;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -56,6 +57,11 @@ namespace grenius_api
             {
                 options.Configuration = builder.Configuration.GetConnectionString("Redis");
                 options.InstanceName = "redis-dev";
+            });
+
+            builder.Services.AddMassTransit(x =>
+            {
+                x.UsingRabbitMq();
             });
 
 

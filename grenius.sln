@@ -5,7 +5,7 @@ VisualStudioVersion = 17.9.34723.18
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "grenius-api", "grenius-api\grenius-api.csproj", "{93059A09-0C65-4AF6-92CD-626C3E371D81}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "grenius-rating", "grenius-rating\grenius-rating.csproj", "{F7D5BDBB-4E18-48D8-9EB7-E8935AF47CC1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageContracts", "MessageContracts\MessageContracts.csproj", "{DD041C0E-6DF0-4560-AAF2-587142E4DCC9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{93059A09-0C65-4AF6-92CD-626C3E371D81}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{93059A09-0C65-4AF6-92CD-626C3E371D81}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{93059A09-0C65-4AF6-92CD-626C3E371D81}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F7D5BDBB-4E18-48D8-9EB7-E8935AF47CC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F7D5BDBB-4E18-48D8-9EB7-E8935AF47CC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F7D5BDBB-4E18-48D8-9EB7-E8935AF47CC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F7D5BDBB-4E18-48D8-9EB7-E8935AF47CC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD041C0E-6DF0-4560-AAF2-587142E4DCC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD041C0E-6DF0-4560-AAF2-587142E4DCC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD041C0E-6DF0-4560-AAF2-587142E4DCC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD041C0E-6DF0-4560-AAF2-587142E4DCC9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

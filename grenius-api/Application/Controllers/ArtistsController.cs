@@ -4,6 +4,8 @@ using grenius_api.Application.Models.Requests;
 using grenius_api.Application.Models.Responses;
 using grenius_api.Domain.Entities;
 using grenius_api.Infrastructure.Database;
+using MassTransit;
+using MessageContracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +14,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace grenius_api.Application.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/artists")]
     [ApiController]
     public class ArtistsController: ControllerBase
@@ -21,16 +23,18 @@ namespace grenius_api.Application.Controllers
         private readonly GreniusContext _db;
         private readonly IMapper _mapper;
         private readonly IDistributedCache _cache;
-    
+        private readonly IPublishEndpoint _publishEndpoint;
         public ArtistsController(GreniusContext db, 
             ILogger<ArtistsController> logger, 
             IMapper mapper,
-            IDistributedCache cache)
+            IDistributedCache cache,
+            IPublishEndpoint publishEndpoint)
         {
             _db = db;
             _logger = logger;
             _mapper = mapper;
             _cache = cache;
+            _publishEndpoint = publishEndpoint;
         }
 
         [HttpGet]
@@ -56,7 +60,13 @@ namespace grenius_api.Application.Controllers
                 _logger.LogWarning("The entered id is less than 1");
                 return BadRequest("Id must be greater than 0");
             }
-
+            int.TryParse(User.Identity!.Name, out int userId);
+            await _publishEndpoint.Publish<RatingMessage>(new RatingMessage
+            {
+                UserId = userId,
+                DateTime = DateTime.UtcNow,
+                Type = TypeEnum.Artist
+            });
             string cacheKey = $"artist_{id}";
             var cachedArtist = await _cache.GetRecordAsync<ArtistResponseDTO>(cancellationToken, cacheKey);
             if (cachedArtist != null)

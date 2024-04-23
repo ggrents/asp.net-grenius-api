@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using grenius_api.Infrastructure.Database;
 
@@ -11,9 +12,11 @@ using grenius_api.Infrastructure.Database;
 namespace grenius_api.Migrations
 {
     [DbContext(typeof(GreniusContext))]
-    partial class GreniusContextModelSnapshot : ModelSnapshot
+    [Migration("20240423143453_ratings-columns")]
+    partial class ratingscolumns
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -136,24 +139,21 @@ namespace grenius_api.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
+                        .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ArtistId")
-                        .HasColumnType("int")
-                        .HasColumnName("artist_id");
+                        .HasColumnType("int");
 
                     b.Property<long>("Count")
-                        .HasColumnType("BIGINT")
-                        .HasColumnName("count");
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ArtistId");
 
-                    b.ToTable("artists_rating", (string)null);
+                    b.ToTable("ArtistsRating");
                 });
 
             modelBuilder.Entity("grenius_api.Domain.Entities.Feature", b =>
@@ -353,24 +353,21 @@ namespace grenius_api.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
+                        .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<long>("Count")
-                        .HasColumnType("BIGINT")
-                        .HasColumnName("count");
+                        .HasColumnType("bigint");
 
                     b.Property<int>("SongId")
-                        .HasColumnType("int")
-                        .HasColumnName("song_id");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("SongId");
 
-                    b.ToTable("songs_rating", (string)null);
+                    b.ToTable("SongsRating");
                 });
 
             modelBuilder.Entity("grenius_api.Domain.Entities.User", b =>

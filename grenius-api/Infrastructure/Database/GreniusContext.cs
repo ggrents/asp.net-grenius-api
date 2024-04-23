@@ -17,6 +17,8 @@ namespace grenius_api.Infrastructure.Database
         public DbSet<Annotation> Annotations { get; set; }
         public DbSet<Album> Albums { get; set; }
         public DbSet<Feature> Features{ get; set; }
+        public DbSet<ArtistRating> ArtistsRating { get; set; }
+        public DbSet<SongRating> SongsRating { get; set; }
         public GreniusContext(IConfiguration configuration)
         {
             _connectionString = configuration.GetConnectionString("DefaultConnection");
@@ -38,6 +40,8 @@ namespace grenius_api.Infrastructure.Database
             modelBuilder.ApplyConfiguration(new AnnotationConfiguration());
             modelBuilder.ApplyConfiguration(new GenreConfiguration());
             modelBuilder.ApplyConfiguration(new ProducerConfiguration());
+            modelBuilder.ApplyConfiguration(new ArtistRatingConfiguration());
+            modelBuilder.ApplyConfiguration(new SongRatingConfiguration());
         }
 
     }
