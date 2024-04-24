@@ -27,9 +27,11 @@
 
 using grenius_api.Application.Extensions;
 using grenius_api.Application.Services;
+using grenius_api.Application.Services.Message;
 using grenius_api.Infrastructure.Database;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -53,15 +55,27 @@ namespace grenius_api
                         .CreateLogger();
             builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
             builder.Services.AddDbContext<GreniusContext>();
+
             builder.Services.AddStackExchangeRedisCache((options) =>
             {
                 options.Configuration = builder.Configuration.GetConnectionString("Redis");
                 options.InstanceName = "redis-dev";
             });
 
-            builder.Services.AddMassTransit(x =>
+
+            builder.Services.AddMassTransit(mass =>
             {
-                x.UsingRabbitMq();
+                var rabbitMqConfig = builder.Configuration.GetSection("MessageBroker");
+                mass.UsingRabbitMq((context, cfg) =>
+                {
+                    cfg.Host(rabbitMqConfig["Host"], h =>
+                    {
+                        h.Username(rabbitMqConfig["Username"]);
+                        h.Password(rabbitMqConfig["Password"]);
+                    });
+
+                    cfg.ConfigureEndpoints(context);
+                });
             });
 
 
@@ -69,6 +83,7 @@ namespace grenius_api
             builder.Configuration.GetSection(SecurityOptions.Security));
             builder.Services.AddScoped<IAnnotationService, AnnotationService>();
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IMessageService, MessageService>();
             
             
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

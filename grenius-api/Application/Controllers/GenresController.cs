@@ -13,7 +13,7 @@ using System.Text;
 
 namespace grenius_api.Application.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [Route("api/genres")]
     [ApiController]
     public class GenresController : ControllerBase
@@ -35,19 +35,7 @@ namespace grenius_api.Application.Controllers
         [SwaggerResponse(200, Type = typeof(List<GenreResponseDTO>))]
         public async Task<IActionResult> GetGenres([FromQuery] string message, [FromQuery] string key, CancellationToken cancellationToken)
         {
-
-            var factory = new ConnectionFactory() { HostName = "localhost" };
-            using (var connection = factory.CreateConnection())
-            using (var channel = connection.CreateModel())
-            {
-                var body = Encoding.UTF8.GetBytes(message);
-                channel.BasicPublish(exchange: "rating-exchange",
-                               routingKey: "rating",
-                               basicProperties: null,
-                               body: body);
-
                 return Ok(_mapper.Map<List<GenreResponseDTO>>(await _db.Genres.ToListAsync(cancellationToken)));
-            }
         }
 
         [HttpGet("{id}")]

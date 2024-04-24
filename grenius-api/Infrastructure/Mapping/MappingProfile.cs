@@ -15,6 +15,9 @@ public class MappingProfile : Profile
         CreateMap<Lyrics, LyricsResponseDTO>();
         CreateMap<User, UserResponseDTO>();
         CreateMap<Role, RoleResponseDTO>();
+        CreateMap<ArtistRating, ArtistRatingResponseDTO>();
+        CreateMap<SongRating, SongRatingResponseDTO>();
+        CreateMap<Role, RoleResponseDTO>();
         CreateMap<Annotation, AnnotationResponseDTO>()
             .ConvertUsing<AnnotationToAnnotationResponseDTOConverter>();
         CreateMap<Album, AlbumResponseDTO>().ForMember(dest => dest.AlbumType, opt => opt.MapFrom(src => GetAlbumTypeDescription(src.AlbumTypeId)));

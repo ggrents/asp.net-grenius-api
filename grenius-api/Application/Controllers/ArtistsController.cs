@@ -2,6 +2,7 @@
 using grenius_api.Application.Extensions;
 using grenius_api.Application.Models.Requests;
 using grenius_api.Application.Models.Responses;
+using grenius_api.Application.Services.Message;
 using grenius_api.Domain.Entities;
 using grenius_api.Infrastructure.Database;
 using MassTransit;
@@ -14,7 +15,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace grenius_api.Application.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [Route("api/artists")]
     [ApiController]
     public class ArtistsController: ControllerBase
@@ -23,18 +24,19 @@ namespace grenius_api.Application.Controllers
         private readonly GreniusContext _db;
         private readonly IMapper _mapper;
         private readonly IDistributedCache _cache;
-        private readonly IPublishEndpoint _publishEndpoint;
-        public ArtistsController(GreniusContext db, 
-            ILogger<ArtistsController> logger, 
+        private readonly IMessageService _messageService;
+        public ArtistsController(GreniusContext db,
+            ILogger<ArtistsController> logger,
             IMapper mapper,
             IDistributedCache cache,
-            IPublishEndpoint publishEndpoint)
+            IMessageService messageService
+            )
         {
             _db = db;
             _logger = logger;
             _mapper = mapper;
             _cache = cache;
-            _publishEndpoint = publishEndpoint;
+            _messageService = messageService;
         }
 
         [HttpGet]
@@ -60,13 +62,16 @@ namespace grenius_api.Application.Controllers
                 _logger.LogWarning("The entered id is less than 1");
                 return BadRequest("Id must be greater than 0");
             }
+
             int.TryParse(User.Identity!.Name, out int userId);
-            await _publishEndpoint.Publish<RatingMessage>(new RatingMessage
+            await _messageService.Publish(new RatingMessage
             {
+                EntityId = id,
                 UserId = userId,
-                DateTime = DateTime.UtcNow,
+                DateTime = DateTime.Now,
                 Type = TypeEnum.Artist
             });
+            
             string cacheKey = $"artist_{id}";
             var cachedArtist = await _cache.GetRecordAsync<ArtistResponseDTO>(cancellationToken, cacheKey);
             if (cachedArtist != null)

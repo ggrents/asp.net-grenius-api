@@ -1,6 +1,7 @@
 ﻿namespace grenius_rating.Application.Repository
 {
-    public class IDataRepository
+    public interface IDataRepository
     {
+        Task AddRatingCount(int entityId, int columnType);
     }
 }

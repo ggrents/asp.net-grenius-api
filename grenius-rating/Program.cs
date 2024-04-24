@@ -1,13 +1,15 @@
-namespace grenius_rating
-{
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
-            var app = builder.Build();
+using grenius_rating.Application.Repository;
+using grenius_rating.Infrastructure;
+using MassTransit;
 
-            app.Run();
-        }
-    }
-}
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddScoped<IDataRepository, DataRepository>();
+
+builder.Services.AddRabbitMassTransit(builder.Configuration);
+
+var app = builder.Build();
+app.UseHttpsRedirection();
+
+app.Run();
+

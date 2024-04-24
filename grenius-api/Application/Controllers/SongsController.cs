@@ -2,8 +2,10 @@
 using grenius_api.Application.Extensions;
 using grenius_api.Application.Models.Requests;
 using grenius_api.Application.Models.Responses;
+using grenius_api.Application.Services.Message;
 using grenius_api.Domain.Entities;
 using grenius_api.Infrastructure.Database;
+using MessageContracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -21,14 +23,15 @@ namespace grenius_api.Application.Controllers
         private readonly GreniusContext _db;
         private readonly IMapper _mapper;
         private readonly IDistributedCache _cache;
-
+        private readonly IMessageService _messageService;
         public SongsController(GreniusContext db, ILogger<SongsController> logger,
-            IMapper mapper, IDistributedCache cache)
+            IMapper mapper, IDistributedCache cache, IMessageService messageService)
         {
             _db = db;
             _logger = logger;
             _mapper = mapper;
             _cache = cache;
+            _messageService = messageService;
         }
 
         [HttpGet]
@@ -90,6 +93,15 @@ namespace grenius_api.Application.Controllers
                 _logger.LogWarning("The entered id is less than 1");
                 return BadRequest("Id must be greater than 0");
             }
+
+            int.TryParse(User.Identity!.Name, out int userId);
+            await _messageService.Publish(new RatingMessage
+            {
+                EntityId = id,
+                UserId = userId,
+                DateTime = DateTime.Now,
+                Type = TypeEnum.Song
+            });
 
             string cacheKey = $"song_{id}";
             var cachedSong = await _cache.GetRecordAsync<SongResponseDTO>(cancellationToken, cacheKey);

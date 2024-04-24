@@ -1,6 +1,0 @@
-@grenius_news_HostAddress = http://localhost:5143
-
-GET {{grenius_news_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

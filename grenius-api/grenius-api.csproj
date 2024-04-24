@@ -34,10 +34,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Application\MessageContracts\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\MessageContracts\MessageContracts.csproj" />
   </ItemGroup>
 
