@@ -26,7 +26,7 @@ namespace grenius_api.Application.Controllers
         [HttpGet("most-requested-artists")]
         [SwaggerOperation(Summary = "Get most requested artists")]
         [SwaggerResponse(200, Type = typeof(ArtistRatingResponseDTO))]
-        public async Task<IActionResult> GetMostRequestedArtists(int number= 50, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetMostRequestedArtists(CancellationToken cancellationToken,int number= 50)
         {
             var mostRequestedArtists = await _db.ArtistsRating
                                                 .Include(a=>a.Artist)
@@ -41,7 +41,7 @@ namespace grenius_api.Application.Controllers
         [HttpGet("most-requested-songs")]
         [SwaggerOperation(Summary = "Get most requested songs")]
         [SwaggerResponse(200, Type = typeof(SongRatingResponseDTO))]
-        public async Task<IActionResult> GetMostRequestedSongs(int number = 50, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetMostRequestedSongs(CancellationToken cancellationToken , int number = 50)
         {
             var mostRequestedSongs = await _db.SongsRating
                                                 .Include(a => a.Song)

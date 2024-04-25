@@ -31,7 +31,6 @@ using grenius_api.Application.Services.Message;
 using grenius_api.Infrastructure.Database;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -146,7 +145,7 @@ namespace grenius_api
                 });
             });
 
-
+            builder.Services.AddHealthChecks();
             builder.Host.UseSerilog();
 
             
@@ -167,6 +166,7 @@ namespace grenius_api
             app.UseAuthorization();
       
             app.MapControllers();
+            app.MapHealthChecks("/healthz");
             app.Run();
         }
     }

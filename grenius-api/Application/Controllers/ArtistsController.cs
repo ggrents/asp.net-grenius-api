@@ -71,7 +71,6 @@ namespace grenius_api.Application.Controllers
                 DateTime = DateTime.Now,
                 Type = TypeEnum.Artist
             });
-            
             string cacheKey = $"artist_{id}";
             var cachedArtist = await _cache.GetRecordAsync<ArtistResponseDTO>(cancellationToken, cacheKey);
             if (cachedArtist != null)
