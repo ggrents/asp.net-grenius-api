@@ -1,19 +1,71 @@
-﻿version: '3.8'
+﻿version: "3.8"
+networks:
+  grenius-prod:
+    driver: bridge
 
 services:
+  api:
+    container_name: grenius-api
+    image: api
+    build:
+      context: .
+      dockerfile: grenius.Api.Dockerfile
+    ports:
+      - 5000:5000
+    depends_on:
+      - rabbitmq
+      - redis
+      - seq
+      - mssql
+    networks:
+      - grenius-prod
+
+  rating:
+    container_name: grenius-rating
+    image: rating
+    build:
+      context: .
+      dockerfile: grenius.Api.Dockerfile
+    ports:
+      - 5001:5001
+    depends_on:
+      - rabbitmq
+      - redis
+      - seq
+      - mssql
+    networks:
+      - grenius-prod
+
+  mssql:
+    container_name: grenius-sqlserver
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=grenius
+    ports:
+      - "1433:1433"
+    networks:
+      - grenius-prod
+
   seq:
     image: datalust/seq:latest
     ports:
       - "5341:80"
     environment:
       ACCEPT_EULA: Y
+    networks:
+      - grenius-prod
 
   rabbitmq:
     image: rabbitmq:latest
     ports:
       - "5672:5672"
+    networks:
+      - grenius-prod
 
   redis:
     image: redis:latest
     ports:
       - "6379:6379"
+    networks:
+      - grenius-prod

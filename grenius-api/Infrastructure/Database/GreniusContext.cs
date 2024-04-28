@@ -22,6 +22,7 @@ namespace grenius_api.Infrastructure.Database
         public GreniusContext(IConfiguration configuration)
         {
             _connectionString = configuration.GetConnectionString("DefaultConnection");
+
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

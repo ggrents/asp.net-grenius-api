@@ -31,6 +31,7 @@ using grenius_api.Application.Services.Message;
 using grenius_api.Infrastructure.Database;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -155,18 +156,23 @@ namespace grenius_api
             
             app.UseSerilogRequestLogging();
 
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
 
-            app.UseHttpsRedirection();
+            app.UseSwagger();
+            app.UseSwaggerUI();
+            
+
             app.UseAuthentication();
             app.UseAuthorization();
       
             app.MapControllers();
             app.MapHealthChecks("/healthz");
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<GreniusContext>();
+                db.Database.Migrate();
+            }
+
             app.Run();
         }
     }
