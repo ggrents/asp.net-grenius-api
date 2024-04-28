@@ -1,0 +1,19 @@
+﻿version: '3.8'
+
+services:
+  seq:
+    image: datalust/seq:latest
+    ports:
+      - "5341:80"
+    environment:
+      ACCEPT_EULA: Y
+
+  rabbitmq:
+    image: rabbitmq:latest
+    ports:
+      - "5672:5672"
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"

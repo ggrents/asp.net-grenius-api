@@ -1,6 +1,5 @@
 using grenius_rating.Application.Repository;
 using grenius_rating.Infrastructure;
-using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
 
