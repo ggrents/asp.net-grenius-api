@@ -3,8 +3,22 @@
 # <p align="center">GRENIUS API</p>
 
 ## About
+Grenius API is an application based on microservice and event-driven architecture, drawing inspiration from the renowned Genius service. It offers users a seamless interface for accessing and managing data about famous artists, their popular songs, lyrics, and annotations. 
 
+### Functionality
 
+The application facilitates retrieval of artist and track data in a user-friendly manner, incorporating pagination and diverse filtering options.
+Through designated endpoints, users can seamlessly add and oversee texts and annotations. Utilizing interservice communication, 
+the popularity of artists and songs is continually computed, and users can track ratings via dedicated endpoints.
+
+### To enhance the quality, reliability, and performance of the system, the following supplementary development tools have been integrated:
+- MS SQL serves as the foundational database for the project, providing structured storage and retrieval of data.
+- Redis is utilized for distributed caching, enhancing system performance and scalability by storing frequently accessed data in memory.
+- Serilog coupled with Seq is employed for logging purposes, offering sophisticated log management and analysis capabilities, thereby facilitating comprehensive system monitoring and troubleshooting.
+- RabbitMQ is chosen as the message broker, providing reliable and asynchronous communication between system components, with MassTransit serving as a facilitative library for seamless integration and interaction with RabbitMQ.
+  
+
+  
 ## Usage examples
 - When the application is launched, it is redirected to the swagger page for convenient operation and testing of endpoints
 
